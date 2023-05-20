@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../plugins/element-ui/index.css"/>
+    <link rel="stylesheet" href="../styles/common.css"/>
+    <link rel="stylesheet" href="../styles/page.css"/>
+
+
+</head>
+<body>
+<div class="addBrand-container" id="member-add-app">
+    <div class="container">
+        <!-- 整个form表单 -->
+        <el-form ref="ruleForm" :model="ruleForm" :rules="rules" :inline="true"
+                 label-width="180px" lass="demo-ruleForm">
+            <el-form-item label="图书名称:" prop="bookName">
+                <el-input v-model="ruleForm.bookName" placeholder="请输入图书名称" maxlength="20"></el-input>
+            </el-form-item>
+            <el-form-item label="ISBM编号:" prop="bookIsbn">
+                <el-input v-model="ruleForm.bookIsbn" placeholder="请输入ISBN编号" maxlength="20"></el-input>
+            </el-form-item>
+            <el-form-item label="出版社:" prop="bookPress">
+                <el-input v-model="ruleForm.bookPress" placeholder="请输入出版社" maxlength="20"></el-input>
+            </el-form-item>
+            <el-form-item label="作者:" prop="bookAuthor">
+                <el-input v-model="ruleForm.bookAuthor" placeholder="请输入作者" maxlength="20"></el-input>
+            </el-form-item>
+            <el-form-item label="页数:" prop="bookPagination">
+                <el-input v-model="ruleForm.bookPagination" placeholder="请输入页数" maxlength="5"></el-input>
+            </el-form-item>
+            <el-form-item label="价格:" prop="bookPrice">
+                <el-input v-model="ruleForm.bookPrice" placeholder="请输入价格" maxlength="10"></el-input>
+            </el-form-item>
+            <el-form-item label="上架时间:" prop="bookUploadtime">
+                <el-date-picker v-model="ruleForm.bookUploadtime" clearable
+                                value-format="yyyy-MM-dd"
+                                type="date" placeholder="选择日期"
+                ></el-date-picker>
+            </el-form-item>
+            <el-form-item label="状态:" prop="bookstatus">
+                <el-select v-model="ruleForm.bookStatus" placeholder="请选择图书状态" @change="$forceUpdate()">
+                    <el-option v-for="(item, index) in bookStatusList" :key="index" :label="item.name"
+                               :value="item.id"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form :inline="true" label-width="180px" lass="demo-ruleForm" :rules="rules"
+                     v-if="ruleForm.bookStatus === '1' || ruleForm.bookStatus === '2'">
+                <!-- 对于借阅人 我们需要查询数据库 获得所有的借阅者信息 -->
+                <el-form-item label="借阅人:" prop="bookBorrower">
+                    <el-select v-model="ruleForm.bookBorrower" placeholder="请选择借阅人" @change="$forceUpdate()">
+                        <el-option v-for="(item, index) in userData" :key="index" :label="item.userName"
+                                   :value="item.userId">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="借阅时间:" prop="bookBorrowtime">
+                    <el-date-picker v-model="ruleForm.bookBorrowtime" clearable
+                                    value-format="yyyy-MM-dd"
+                                    type="date" placeholder="选择日期"
+                    ></el-date-picker>
+                </el-form-item>
+                <el-form-item label="归还时间:" prop="bookReturntime">
+                    <el-date-picker v-model="ruleForm.bookReturntime" clearable
+                                    value-format="yyyy-MM-dd"
+                                    type="date" placeholder="选择日期"
+                    ></el-date-picker>
+                </el-form-item>
+            </el-form>
+
+            <div class="subBox address">
+                <el-form-item>
+                    <el-button @click="goBack()">
+                        取消
+                    </el-button>
+                    <el-button type="primary" @click="submitForm('ruleForm', false)">
+                        保存
+                    </el-button>
+                    <el-button v-if="actionType === 'add'" type="primary"
+                               class="continue" @click="submitForm('ruleForm', true)">
+                        保存并继续添加
+                    </el-button>
+                </el-form-item>
+            </div>
+        </el-form>
+    </div>
+</div>
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="../plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../plugins/element-ui/index.js"></script>
+<!-- API -->
+<script src="../api/book.js"></script>
+<script src="../api/user.js"></script>
+<!-- 引入axios -->
+<script src="../plugins/axios/axios.min.js"></script>
+<!-- 引入自己辨析的VUE-AXIOS请求响应拦截器 -->
+<script src="../js/request.js"></script>
+<!-- 获取url地址上面的参数 -->
+<script src="../js/index.js"></script>
+<script>
+    new Vue({
+        el: '#member-add-app',
+        data() {
+            return {
+                id: '',
+                actionType: '',
+                ruleForm: {
+                    'bookName': '',
+                    'bookIsbn': '',
+                    'bookPress': '',
+                    'bookAuthor': '',
+                    'bookPagination': '',
+                    'bookPrice': '',
+                    'bookUploadtime': '',
+                    'bookStatus': '0',
+                    'bookBorrower': null,
+                    'bookBorrowtime': null,
+                    'bookReturntime': null,
+                },
+                // 查询后台得到的所有借阅者信息
+                userData: [],
+                // 图书状态列表
+                bookStatusList: [{
+                    'id': '0',
+                    'name': '可借阅'
+                }, {
+                    'id': '1',
+                    'name': '已借阅'
+                }, {
+                    'id': '2',
+                    'name': '归还中'
+                }, {
+                    'id': '3',
+                    'name': '已下架'
+                }],
+            }
+        },
+        computed: {
+            // 校验规则
+            rules() {
+                return {
+                    // 图书名称校验，账号长度3~20
+                    "bookName": [
+                        {required: true, message: '图书名称不能为空', trigger: 'blur'}
+                    ],
+                    // 图书ISBM编号校验
+                    "bookIsbn": [
+                        {required: true, message: '图书ISBM编号不能为空', trigger: 'blur'},
+                        {
+                            required: true,
+                            pattern: /^\d{3,9}$/,
+                            message: 'ISBM编号应为数字类型，且长度3~9',
+                            trigger: 'blur'
+                        }
+                    ],
+                    // 图书出版社
+                    "bookPress": [
+                        {required: true, message: '图书出版社不能为空', trigger: 'blur'}
+                    ],
+                    // 图书作者
+                    "bookAuthor": [
+                        {required: true, message: '图书作者不能为空', trigger: 'blur'}
+                    ],
+                    // 图书页数
+                    "bookPagination": [
+                        {required: true, message: '图书页数不能为空', trigger: 'blur'},
+                        {
+                            required: true,
+                            pattern: /^[1-9]\d{0,10}$/,
+                            message: '页数应该为数字类型，且首位不为0',
+                            trigger: 'blur'
+                        }
+                    ],
+                    // 图书价格
+                    "bookPrice": [
+                        {required: true, message: '图书价格不能为空', trigger: 'blur'},
+                        {
+                            required: true,
+                            pattern: /(^[1-9]\d*(\.\d{1,2})?$)|(^0(\.\d{1,2})?$)/,
+                            message: '价格应为Double类型，小数点后面最多2位',
+                            trigger: 'blur'
+                        }
+                    ],
+                    // 图书上架时间
+                    "bookUploadtime": [
+                        {required: true, message: '图书上架时间不能为空', trigger: 'blur'},
+                    ],
+                    // 图书借阅人 这里这个规则不起作用 这里只是起到了星号的作用 真正的规则在提交的时候
+                    "bookBorrower": [
+                        {required: true, message: '借阅人不可为空', trigger: 'blur'},
+                    ],
+                }
+            },
+        },
+        // VUE模型创建之后 会判断该页面应该为添加页面还是编辑页面
+        created() {
+            this.id = requestUrlParam('id')
+            this.actionType = this.id ? 'edit' : 'add'
+            if (this.id) {
+                this.init()
+            }
+        },
+        mounted() {
+            this.getUsers()
+        },
+        methods: {
+            // 如果要求为编辑，那么先根据ID查询数据，然后返回
+            async init() {
+                queryBookById(this.id).then(res => {
+                    if (String(res.code) === '1') {
+                        this.ruleForm = res.data
+                    } else {
+                        this.$message.error(res.msg || '操作失败')
+                    }
+                })
+            },
+            // 获取所有账户正常的借阅者信息
+            getUsers() {
+                console.log("发送请求获取所有的借阅者信息")
+                getAllUsers().then(res => {
+                    if (String(res.code) === '1') {
+                        this.userData = res.data
+                    } else {
+                        this.$message.error(res.msg || '操作失败')
+                    }
+                })
+            },
+            submitForm(formName, st) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        // 如果用户没有选择借阅人 那么提醒一下
+                        if ((this.ruleForm.bookStatus === '1' || this.ruleForm.bookStatus === '2') && this.ruleForm.bookBorrower == null) {
+                            this.$message.error('请选择借阅人');
+                        } else {
+                            if (this.actionType === 'add') {
+                                const params = {
+                                    // 三个点为ES6语法，扩展运算符，就是将ruleForm里面数据拆开放入params里面
+                                    ...this.ruleForm,
+                                }
+                                addBook(params).then(res => {
+                                    if (res.code === 1) {
+                                        this.$message.success('图书信息添加成功！')
+                                        if (!st) {
+                                            this.goBack()
+                                        } else {
+                                            this.ruleForm = {
+                                                'bookName': '',
+                                                'bookIsbn': '',
+                                                'bookPress': '',
+                                                'bookAuthor': '',
+                                                'bookPagination': '',
+                                                'bookPrice': '',
+                                                'bookUploadtime': '',
+                                                'bookStatus': '2',
+                                                'bookBorrower': null,
+                                                'bookBorrowtime': null,
+                                                'bookReturntime': null,
+                                            }
+                                        }
+                                    } else {
+                                        this.$message.error(res.msg || '操作失败')
+                                    }
+                                }).catch(err => {
+                                    this.$message.error('请求出错了：' + err)
+                                })
+                            } else {
+                                const params = {
+                                    ...this.ruleForm,
+                                }
+                                editBook(params).then(res => {
+                                    if (res.code === 1) {
+                                        this.$message.success('图书信息修改成功！')
+                                        this.goBack()
+                                    } else {
+                                        this.$message.error(res.msg || '操作失败')
+                                    }
+                                }).catch(err => {
+                                    this.$message.error('请求出错了：' + err)
+                                })
+                            }
+                        }
+                    } else {
+                        console.log('error submit!!')
+                        return false
+                    }
+                })
+            },
+            goBack() {
+                window.parent.menuHandle({
+                    id: '1',
+                    url: 'page/book.html',
+                    name: '图书管理'
+                }, false)
+            }
+        }
+    })
+</script>
+</body>
+</html>

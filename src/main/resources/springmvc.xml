@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- xmlns:mvc开启SpringMVC命名空间 -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/mvc
+                           http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                           http://www.springframework.org/schema/context
+                           https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--
+        启用spring mvc 注解, 默认的注解映射的支持。
+        自动注册 RequestMappingHandlerMapping RequestMappingHandlerAdapter 两个 bean
+        这是 Spring mvc 分发请求所必须的
+        并提供了数据绑定支持、读写XML支持、读写Json支持
+        等同于@EnableWebMvc
+    -->
+    <mvc:annotation-driven/>
+
+    <!--包扫描 等同于@ComponentScan-->
+    <context:component-scan base-package="com.linxuan.controller"/>
+
+    <!-- 静态资源配置方案 -->
+    <!-- 添加标签后，会定义一个DefaultServletHttpRequestHandler对象，
+        该对象对进入DispatcherServlet的URL惊醒过滤筛查，如果发现是静态资源请求
+        那么转交给Tomcat的默认的DefaultServlet处理，入股哦不是静态资源请求，那么继续有SpringMVC处理
+    -->
+    <mvc:default-servlet-handler/>
+</beans>

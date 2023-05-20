@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../plugins/element-ui/index.css"/>
+    <link rel="stylesheet" href="../styles/common.css"/>
+    <link rel="stylesheet" href="../styles/page.css"/>
+</head>
+<body>
+<div class="dashboard-container" id="category-app">
+    <div class="container">
+        <div class="tableBar" style="display: inline-block">
+            <el-button type="primary" class="continue" @click="addClass()">
+                + 新增借阅者信息
+            </el-button>
+        </div>
+        <el-table :data="tableData" stripe class="tableBox">
+            <el-table-column prop="userName" label="借阅者名称" align="center"></el-table-column>
+            <el-table-column prop="userEmail" label="借阅者邮箱" align="center"></el-table-column>
+            <el-table-column prop="userStatus" label="借阅者状态" align="center">
+                <template slot-scope="scope">
+                    <span>{{ scope.row.userStatus == '0' ? '正常' : '禁用' }}</span>
+                </template>
+            </el-table-column>
+            <el-table-column prop="bookName" label="借阅的书籍" align="center">
+                <template slot-scope="scope">
+                    {{scope.row.bookName === null ? 'NULL' : '《' + scope.row.bookName + '》'}}
+                </template>
+            </el-table-column>
+            <el-table-column prop="recordBorrowtime" label="借阅时间" align="center">
+                <template slot-scope="scope">
+                    {{scope.row.recordBorrowtime === null ? 'NULL' : scope.row.recordBorrowtime}}
+                </template>
+            </el-table-column>
+            <el-table-column prop="recordRemandTime" label="归还时间" align="center">
+                <template slot-scope="scope">
+                    {{scope.row.recordRemandTime === null ? 'NULL' : scope.row.recordRemandTime}}
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" width="160" align="center">
+                <template slot-scope="scope">
+                    <el-button type="text" size="small" class="blueBug"
+                               @click="editHandle(scope.row)">
+                        修改
+                    </el-button>
+                    <el-button type="text" size="small" class="delBut non"
+                               @click="deleteHandle(scope.row)">
+                        删除借阅者信息
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <!-- 最下面的分页信息 -->
+        <el-pagination class="pageList" :page-sizes="[5, 10, 20, 40]"
+                       :page-size="pageSize" :total="counts" :current-page.sync="page"
+                       layout="total, sizes, prev, pager, next, jumper"
+                       @size-change="handleSizeChange"
+                       @current-change="handleCurrentChange"
+        ></el-pagination>
+    </div>
+    <!-- 对话框 -->
+    <el-dialog :title="classData.title" :visible.sync="classData.dialogVisible"
+               width="30%" :before-close="handleClose">
+        <el-form class="demo-form-inline" label-width="100px">
+            <el-form-item label="借阅者名称：">
+                <el-input v-model="classData.userName" placeholder="请输入借阅者名称"
+                          maxlength="14"></el-input>
+            </el-form-item>
+            <el-form-item label="借阅者邮箱：">
+                <el-input v-model="classData.userEmail" placeholder="请输入借阅者邮箱">
+                </el-input>
+            </el-form-item>
+            <el-form-item label="借阅者状态:">
+                <el-radio-group v-model="classData.userStatus">
+                    <el-radio label="正常"></el-radio>
+                    <el-radio label="禁用"></el-radio>
+                </el-radio-group>
+            </el-form-item>
+        </el-form>
+        <!-- 对话框下面的提交栏 -->
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="classData.dialogVisible = false">
+                取 消
+            </el-button>
+            <el-button type="primary" size="medium" @click="submitForm()">
+                确 定
+            </el-button>
+            <el-button type="primary" size="medium" class="continue" v-if="action === 'add'"
+                       @click="submitForm('go')">
+                保存并继续添加
+            </el-button>
+      </span>
+    </el-dialog>
+</div>
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="../plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../plugins/element-ui/index.js"></script>
+<!-- 引入axios -->
+<script src="../plugins/axios/axios.min.js"></script>
+<script src="../js/request.js"></script>
+<script src="../api/user.js"></script>
+<script>
+    new Vue({
+        el: '#category-app',
+        data() {
+            return {
+                // 查询数据总数
+                counts: 0,
+                // 页数
+                page: 1,
+                // 每页查询数量
+                pageSize: 5,
+                // 查询出来的数据
+                tableData: [],
+                // 对话框行为 添加亦或者是修改 默认是添加操作
+                action: 'add',
+                // 对话框数据，也是添加借阅者信息的数据
+                classData: {
+                    // 对话框标题
+                    'title': '添加借阅者信息',
+                    // 是否显示对话框
+                    'dialogVisible': false,
+                    // 添加的借阅者名称
+                    'userName': '',
+                    // 借阅者邮箱
+                    'userEmail': '',
+                    // 借阅者初始状态 刚开始都是正常的 0为正常
+                    'userStatus': '正常'
+                }
+            }
+        },
+        computed: {},
+        created() {
+            this.init()
+        },
+        mounted() {
+        },
+        methods: {
+            // 页面初始化的函数
+            async init() {
+                await getUserRecordPage({
+                    'page': this.page,
+                    'pageSize': this.pageSize
+                }).then(res => {
+                    if (String(res.code) === '1') {
+                        // 设置响应数据
+                        this.tableData = res.data.list
+                        // 设置响应总数据量
+                        this.counts = Number(res.data.total)
+                    } else {
+                        this.$message.error(res.msg || '操作失败')
+                    }
+                }).catch(err => {
+                    this.$message.error('请求出错了：' + err)
+                })
+            },
+            // 处理查询请求
+            handleQuery() {
+                this.page = 1;
+                this.init();
+            },
+            // 添加
+            addClass() {
+                // 对这些数据重新初始化为空，方便填写
+                this.classData.userName = ''
+                this.classData.userEmail = ''
+                this.classData.userStatus = '正常'
+                // 让对话框显现
+                this.classData.dialogVisible = true
+            },
+            // 修改借阅者信息
+            editHandle(data) {
+                // 如果借阅者关联着书籍 那么不能够修改
+                if (data.bookName != null) {
+                    this.$message.error("该借阅者目前仍借阅着书籍，无法修改 如需修改请转至图书管理页面修改图书信息")
+                } else {
+                    // 对这些信息初始化
+                    this.classData.title = "修改借阅者信息"
+                    this.classData.userName = data.userName
+                    this.classData.userEmail = data.userEmail
+                    // 数据库中存储的 Status 是0 和 1进行存储 所以这里判断一下
+                    this.classData.userStatus = data.userStatus === '0' ? '正常' : '禁用'
+                    // 新增加一个属性 该行的借阅者ID 就是凭借它进行修改借阅者信息的
+                    this.classData.userId = data.userId
+                    // 设置行为 修改操作
+                    this.action = 'edit'
+                    // 让对话框显现
+                    this.classData.dialogVisible = true
+                }
+            },
+            // 关闭弹窗
+            handleClose() {
+                this.classData.dialogVisible = false
+            },
+            // 删除
+            deleteHandle(data) {
+                // 如果借阅者关联着书籍 那么不能够删除
+                if (data.bookName != null) {
+                    this.$message.error("该借阅者目前仍借阅书籍，无法删除, 如需删除请转至图书馆里页面修改图书信息")
+                } else {
+                    this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+                        'confirmButtonText': '确定',
+                        'cancelButtonText': '取消',
+                        'type': 'warning'
+                    }).then(() => {
+                        deleteUser(data.userId).then(res => {
+                            // 如果删除成功，那么就弹出信息，并且重新查询请求
+                            if (res.code === 1) {
+                                this.$message.success('删除成功！')
+                                this.handleQuery()
+                            } else {
+                                this.$message.error(res.msg || '操作失败')
+                            }
+                        }).catch(err => {
+                            this.$message.error('请求出错了：' + err)
+                        })
+                    })
+                }
+            },
+            // 数据提交
+            submitForm(st) {
+                const classData = this.classData
+                classData.userStatus = classData.userStatus == '正常' ? '0' : '1'
+                const valid = (classData.userName === 0 || classData.userName) && (classData.userEmail === 0 || classData.userEmail)
+                // 判断数据提交的具体操作 如果是新增操作
+                if (this.action === 'add') {
+                    if (valid) {
+                        // 校验邮箱的正则表达式
+                        const reg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/
+                        // 如果校验邮箱成功
+                        if (reg.test(classData.userEmail)) {
+                            const params = {
+                                userName: classData.userName,
+                                userEmail: classData.userEmail,
+                                userStatus: classData.userStatus
+                            }
+                            // 发送请求，参数为借阅者信息
+                            addUser(params).then(res => {
+                                if (res.code === 1) {
+                                    this.$message.success('借阅者信息添加成功！')
+                                    // 判断是否需要继续添加，如果不需要添加
+                                    if (!st) {
+                                        this.classData.dialogVisible = false
+                                    } else {
+                                        // 如果还需要继续添加 那么就将一切恢复
+                                        this.classData.userName = ''
+                                        this.classData.userEmail = ''
+                                        this.classData.userStatus = '正常'
+                                    }
+                                    this.handleQuery()
+                                } else {
+                                    this.$message.error(res.msg || '操作失败')
+                                }
+                            }).catch(err => {
+                                this.$message.error('请求出错了：' + err)
+                            })
+                        } else {
+                            this.$message.error('邮箱输入错误')
+                        }
+                    } else {
+                        this.$message.error('请输入借阅者名称或邮箱')
+                    }
+                } else if (valid) { // 修改操作 并且数据合法
+                    const params = {
+                        userId: classData.userId,
+                        userName: classData.userName,
+                        userEmail: classData.userEmail,
+                        userStatus: classData.userStatus
+                    }
+                    updateUser(params).then(res => {
+                        if (res.code === 1) {
+                            this.$message.success('借阅者修改成功！')
+                            // 对话框消失
+                            this.classData.dialogVisible = false
+                            // 重新查询
+                            this.handleQuery()
+                        } else {
+                            this.$message.error(res.msg || '操作失败')
+                        }
+                    }).catch(err => {
+                        this.$message.error('请求出错了：' + err)
+                    })
+                } else {
+                    this.$message.error('请输入借阅者名称或邮箱')
+                }
+
+            },
+            // 更改每页查询数量
+            handleSizeChange(val) {
+                this.pageSize = val
+                this.init()
+            },
+            // 更改当前查询页数
+            handleCurrentChange(val) {
+                this.page = val
+                this.init()
+            }
+        }
+    })
+</script>
+</body>
+</html>

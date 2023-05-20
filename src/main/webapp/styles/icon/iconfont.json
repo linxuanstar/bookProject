@@ -1,0 +1,30 @@
+{
+  "id": "4065434",
+  "name": "图书管理系统",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "7008960",
+      "name": "lock",
+      "font_class": "lock",
+      "unicode": "e709",
+      "unicode_decimal": 59145
+    },
+    {
+      "icon_id": "4766293",
+      "name": "user",
+      "font_class": "user",
+      "unicode": "e7ae",
+      "unicode_decimal": 59310
+    },
+    {
+      "icon_id": "10294671",
+      "name": "book",
+      "font_class": "book",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    }
+  ]
+}

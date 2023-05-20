@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>图书管理系统后台</title>
+    <link rel="shortcut icon" href="./images/book.png">
+    <!-- 引入element-ui -->
+    <link rel="stylesheet" href="plugins/element-ui/index.css"/>
+    <!-- 引入一些小图标组件 -->
+    <link rel="stylesheet" href="styles/icon/iconfont.css"/>
+    <!-- index页面CSS样式 -->
+    <link rel="stylesheet" href="styles/index.css"/>
+    <!--     <link rel="stylesheet" href="styles/common.css"/> -->
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+        }
+
+        #app {
+            height: 100%;
+        }
+
+        .app-main {
+            height: calc(100% - 64px);
+        }
+
+        .app-main .divTmp {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+<div class="app" id="app">
+    <div class="app-wrapper openSidebar clearfix">
+        <!-- 左侧导航栏 sidebar -->
+        <div class="sidebar-container">
+            <!-- 导航栏上方 -->
+            <div class="logo">
+                <strong>图书管理系统</strong>
+            </div>
+
+            <!-- 导航栏 -->
+            <el-scrollbar wrap-class="scrollbar-wrapper">
+                <!-- 菜单 -->
+                <el-menu :default-active="defAct" :unique-opened="false" :collapse-transition="false"
+                         background-color="#343744" text-color="#bfcbd9" active-text-color="#f4f4f5">
+                    <!-- 循环每一个菜单列表 键是他们的ID -->
+                    <div v-for="item in menuList" :key="item.id">
+                        <el-menu-item :index="item.id" @click="menuHandle(item)">
+                            <!-- 图标 -->
+                            <i class="iconfont" :class="item.icon"></i>
+                            <!-- 菜单名称 -->
+                            <span slot="title">{{item.name}}</span>
+                        </el-menu-item>
+                    </div>
+                </el-menu>
+            </el-scrollbar>
+        </div>
+        <!-- 右侧主页面 -->
+        <div class="main-container">
+            <!-- 主页面顶部导航区域 -->
+            <div class="navbar">
+                <!-- 左侧标题 当前菜单标题 -->
+                <div class="head-lable">
+                    <span>{{headTitle}}</span>
+                </div>
+                <!-- 右侧区域 -->
+                <div class="right-menu">
+                    <!-- 当前登录用户的名称 -->
+                    <div class="avatar-wrapper" v-if="userInfo.username != null">当前登录用户：{{ userInfo.username }}</div>
+                    <div class="avatar-wrapper" v-else>您还未登录 请登录</div>
+                    <!-- 退出当前系统选项 -->
+                    <img src="images/btn_close@2x.png" class="outLogin" alt="退出" @click="logout"/>
+                </div>
+            </div>
+            <!-- 主页面的下方区域 -->
+            <div class="app-main" v-loading="loading">
+                <div class="divTmp" v-show="loading"></div>
+                <!-- 这是在页面挖了一个坑 用于存放页面 -->
+                <iframe id="cIframe" class="c_iframe" name="cIframe"
+                        :src="iframeUrl" width="100%" height="auto"
+                        frameborder="0" v-show="!loading">
+                </iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="plugins/element-ui/index.js"></script>
+<!-- 引入axios -->
+<script src="plugins/axios/axios.min.js"></script>
+<!-- 引入自己写的VUE-AXIOS 请求响应拦截器 -->
+<script src="js/request.js"></script>
+<!-- 发送请求API -->
+<script src="./api/login.js"></script>
+<script>
+
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                // 进入页面默认选中的菜单
+                defAct: '1',
+                // 当前选中的菜单
+                menuActived: '1',
+                // 用户信息
+                userInfo: {},
+                // 菜单列表
+                menuList: [
+                    {
+                        id: '1',
+                        name: '图书管理',
+                        url: 'page/book.html',
+                        icon: 'icon-book'
+                    },
+                    {
+                        id: '2',
+                        name: '借阅者管理',
+                        url: 'page/user.html',
+                        icon: 'icon-user'
+                    }
+                ],
+                // 挖空页面放置的页面
+                iframeUrl: 'page/book.html',
+                // 顶部放置的标题
+                headTitle: '图书管理',
+                // 是否正处于加载状态
+                loading: true,
+                // 超时时间
+                timer: null
+            }
+        },
+        // computed(计算属性)可用于快速计算视图（View）中显示的属性
+        computed: {},
+        // VUE模型钩子函数 VUE模型创建后
+        created() {
+            // 获取到登录时候用户存储进去的信息，格式为JSON，内容为后台响应的用户信息res.data
+            const userInfo = window.localStorage.getItem('userInfo')
+            if (userInfo) {
+                this.userInfo = JSON.parse(userInfo)
+            }
+            this.closeLoading()
+        },
+        // VUE 模型销毁前
+        beforeDestroy() {
+            this.timer = null
+            clearTimeout(this.timer)
+        },
+        // VUE模型挂载完成
+        mounted() {
+            window.menuHandle = this.menuHandle
+        },
+        methods: {
+            // 退出当前系统函数
+            logout() {
+                logoutApi().then((res) => {
+                    if (res.code === 1) {
+                        localStorage.removeItem('userInfo')
+                        window.location.href = 'page/login.html'
+                    }
+                })
+            },
+            // 切换菜单函数
+            menuHandle(item) {
+                this.loading = true
+                this.menuActived = item.id
+                this.iframeUrl = item.url
+                this.headTitle = item.name
+                this.closeLoading()
+            },
+            // 关闭加载函数
+            closeLoading() {
+                this.timer = null
+                this.timer = setTimeout(() => {
+                    this.loading = false
+                }, 1000)
+            }
+        }
+    })
+</script>
+</body>
+</html>

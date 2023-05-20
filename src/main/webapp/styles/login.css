@@ -1,0 +1,105 @@
+/* 整个登录页面login */
+.login {
+    display: flex;
+    /* 定义了项目在主轴上的对齐方式 居中 */
+    justify-content: center;
+    /* 定义项目在交叉轴上如何对齐 与交叉轴的中点对齐 */
+    align-items: center;
+    height: 100%;
+    background-color: #333;
+}
+
+/* 中间的登录框 */
+.login-box {
+    width: 1000px;
+    height: 474px;
+    /* border-radius 属性用于向元素添加圆角边框 */
+    border-radius: 8px;
+    display: flex;
+}
+
+/* 左侧图片 */
+.login-box img {
+    width: 70%;
+    height: auto;
+}
+
+/* 右侧整体登陆表单 */
+.login-form {
+    background: #ffffff;
+    width: 40%;
+    border-radius: 0 8px 8px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.login-form .el-form {
+    width: 214px;
+    height: 307px;
+}
+
+/* 每一个小登录表单 */
+.login-form .el-form-item {
+    margin-bottom: 30px;
+}
+
+.login-form .el-form-item.is-error .el-input__inner {
+    border: 0 !important;
+    border-bottom: 1px solid #fd7065 !important;
+    background: #fff !important;
+}
+
+.login-form .input-icon {
+    height: 32px;
+    width: 18px;
+    margin-left: -2px;
+}
+
+.login-form .el-input__inner {
+    border: 0;
+    border-bottom: 1px solid #e9e9e8;
+    border-radius: 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333333;
+    height: 32px;
+    line-height: 32px;
+}
+
+.login-form .el-input__prefix {
+    left: 0;
+}
+
+.login-form .el-input--prefix .el-input__inner {
+    padding-left: 26px;
+}
+
+.login-form .el-input__inner::placeholder {
+    color: #aeb5c4;
+}
+
+.login-form .el-form-item--medium .el-form-item__content {
+    line-height: 32px;
+}
+
+.login-form .el-input--medium .el-input__icon {
+    line-height: 32px;
+}
+
+/* 鼠标悬停或点击按钮 */
+.login-btn:hover,
+.login-btn:focus {
+     background: #4e3400;
+     color: #b5d2df;
+}
+
+/* 点击登录按钮 */
+.login-btn {
+    border-radius: 17px;
+    padding: 11px 20px !important;
+    margin-top: 10px;
+    font-weight: 500;
+    font-size: 14px;
+    border: 0;
+    background-color: #ffc200;
+}

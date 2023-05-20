@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../plugins/element-ui/index.css"/>
+    <link rel="stylesheet" href="../styles/common.css"/>
+    <link rel="stylesheet" href="../styles/page.css"/>
+</head>
+<body>
+<div class="dashboard-container" id="book-app">
+    <div class="container">
+        <!-- 上方的栏 -->
+        <div class="tableBar">
+            <!-- 添加图书信息按钮 -->
+            <el-button type="primary" @click="searchBookByStatus()" type="primary" size="mini" icon="el-icon-search">
+                搜索已借出图书
+            </el-button>
+            <!-- 添加图书信息按钮 -->
+            <el-button type="primary" @click="addMemberHandle('add')">
+                + 添加图书信息
+            </el-button>
+        </div>
+        <!-- 查询出来的图书信息表格 -->
+        <el-table :data="tableData" stripe class="tableBox">
+            <el-table-column prop="bookName" label="图书名称" align="center" width="210">
+                <template slot-scope="scope">
+                   《{{scope.row.bookName}}》
+                </template>
+            </el-table-column>
+            <el-table-column prop="bookIsbn" label="ISBN编号" align="center" width="130"></el-table-column>
+            <el-table-column prop="bookPress" label="出版社" align="center" width="130"></el-table-column>
+            <el-table-column prop="bookAuthor" label="作者" align="center" width="80"></el-table-column>
+            <el-table-column prop="bookPagination" label="页数" align="center" width="60">
+                <template slot-scope="scope">
+                    {{scope.row.bookPagination}} 页
+                </template>
+            </el-table-column>
+            <el-table-column prop="bookPrice" label="价格" align="center" width="60">
+                <template slot-scope="scope">
+                    {{scope.row.bookPrice}} $
+                </template>
+            </el-table-column>
+            <el-table-column prop="bookUploadtime" label="上架时间" align="center" width="90"></el-table-column>
+            <el-table-column prop="bookStatus" label="状态" align="center" width="70">
+                <template slot-scope="scope">
+                    <el-descriptions v-if="String(scope.row.bookStatus) === '0'">可借阅</el-descriptions>
+                    <el-descriptions v-else-if="String(scope.row.bookStatus) === '1'">已借阅</el-descriptions>
+                    <el-descriptions v-else-if="String(scope.row.bookStatus) === '2'">归还中</el-descriptions>
+                    <el-descriptions v-else-if="String(scope.row.bookStatus) === '3'">已下架</el-descriptions>
+                </template>
+            </el-table-column>
+            <el-table-column prop="bookBorrower" label="借阅人" align="center" width="70">
+                <template slot-scope="scope">
+                    {{scope.row.bookBorrower === null ? 'NULL' : scope.row.bookBorrower}}
+                </template>
+            </el-table-column>
+            <el-table-column prop="bookBorrowtime" label="借阅时间" align="center" width="90">
+                <template slot-scope="scope">
+                    {{scope.row.bookBorrowtime === null ? 'NULL' : scope.row.bookBorrowtime}}
+                </template>
+            </el-table-column>
+            <el-table-column prop="bookReturntime" label="归还时间" align="center" width="90">
+                <template slot-scope="scope">
+                    {{scope.row.bookReturntime === null ? 'NULL' : scope.row.bookReturntime}}
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" align="center">
+                <template slot-scope="scope">
+                    <el-button type="text" size="small" class="blueBug"
+                               @click="addMemberHandle(scope.row.bookId)">
+                        编辑
+                    </el-button>
+                    <el-button type="text" size="small" class="blueBug"
+                               @click="deleteBookHandle(scope.row.bookId)">
+                        删除
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <!-- 最下面的分页 -->
+        <el-pagination class="pageList" :page-sizes="[5, 10, 20, 40]"
+                       :page-size="pageSize" :total="counts" :current-page.sync="page"
+                       layout="total, sizes, prev, pager, next, jumper"
+                       @size-change="handleSizeChange"
+                       @current-change="handleCurrentChange"
+        ></el-pagination>
+    </div>
+</div>
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="../plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../plugins/element-ui/index.js"></script>
+<!-- 引入axios -->
+<script src="../plugins/axios/axios.min.js"></script>
+<script src="../js/request.js"></script>
+<script src="../api/book.js"></script>
+<script>
+    new Vue({
+        el: '#book-app',
+        data() {
+            return {
+                // 获取到的图书数据总数
+                counts: 0,
+                // 当前页数
+                page: 1,
+                // 每页数量
+                pageSize: 5,
+                // 分页查询出来的图书数据
+                tableData: [],
+                // 图书
+                id: '',
+                // 需要查询图书状态
+                status: '',
+            }
+        },
+        computed: {},
+        // VUE模型创建完成之后 调用函数
+        created() {
+            this.init()
+            this.user = JSON.parse(localStorage.getItem('userInfo')).username
+        },
+        mounted() {
+        },
+        methods: {
+            // 初始化函数 对book表进行分页查询
+            async init() {
+                const params = {
+                    page: this.page,
+                    pageSize: this.pageSize,
+                    status: this.status ? this.status : undefined
+                }
+                // 调用函数对Book表进行分页查询
+                await getBookList(params).then(res => {
+                    if (String(res.code) === '1') {
+                        // 获取到后端传过来数据中的数组数据
+                        this.tableData = res.data.list || []
+                        // 查询出来的所有的记录数
+                        this.counts = res.data.total
+                    }
+                }).catch(err => {
+                    this.$message.error('请求出错了：' + err)
+                })
+            },
+            // 查询
+            handleQuery() {
+                this.page = 1;
+                this.init();
+            },
+            // 根据条件查询
+            searchBookByStatus() {
+                this.status = '1';
+                this.handleQuery();
+            },
+            // 添加
+            addMemberHandle(st) {
+                if (st === 'add') {
+                    window.parent.menuHandle({
+                        id: '2',
+                        url: '/page/book_add.html',
+                        name: '添加图书信息'
+                    }, true)
+                } else {
+                    window.parent.menuHandle({
+                        id: '2',
+                        url: '/page/book_add.html?id=' + st,
+                        name: '修改图书信息'
+                    }, true)
+                }
+            },
+            // 删除图书信息
+            deleteBookHandle(id) {
+                this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+                    'confirmButtonText': '确定',
+                    'cancelButtonText': '取消',
+                    'type': 'warning'
+                }).then(() => {
+                    deleteBook(id).then(res => {
+                        if (String(res.code) === '1') {
+                            this.$message.success('删除成功！');
+                            this.handleQuery()
+                        } else {
+                            this.$message.error(res.msg || '操作失败')
+                        }
+                    }).catch(err => {
+                        this.$message.error('请求出错了：' + err)
+                    })
+                })
+            },
+            handleSizeChange(val) {
+                this.pageSize = val
+                this.init()
+            },
+            handleCurrentChange(val) {
+                this.page = val
+                this.init()
+            }
+        }
+    })
+</script>
+</body>
+</html>
