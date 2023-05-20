@@ -86,7 +86,7 @@
 
    点击Maven刷新图标，下载所需依赖。
 
-   ![](https://gitee.com/linxuanstar/bookProject/blob/master/src/main/resources/img/1-1Maven%E5%88%B7%E6%96%B0.png)
+   <img src="https://gitee.com/linxuanstar/bookProject/raw/master/src/main/resources/img/1-1Maven%E5%88%B7%E6%96%B0.png" />
 
 5. 启动项目。
 
@@ -99,3 +99,7 @@
 ## 注意事项
 
 修改前端页面后浏览器没有更换样式，那么可以使用「Ctrl + F5」快捷键清除浏览器缓存强制更新前端页面。
+
+## 联系方式
+
+如果有什么问题可以使用邮箱联系我：linxuan123_n@163.com
