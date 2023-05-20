@@ -23,11 +23,11 @@
 
 本项目实现了用户登录/退出功能、图书信息以及借阅者信息的增删改查功能。
 
-![](.\src\main\resources\img\2-1.png)
+<img src=".\src\main\resources\img\2-1.png"  />
 
-![](.\src\main\resources\img\2-2.png)
+<img src=".\src\main\resources\img\2-2.png" style="zoom:80%;" />
 
-![](.\src\main\resources\img\2-3.png)
+<img src=".\src\main\resources\img\2-3.png" style="zoom:80%;" />
 
 ## 安装教程
 
@@ -47,16 +47,16 @@
    创建一个数据库然后使用图形化界面或者`source`命令将`src\main\resources\demand\bookmanage.sql`导入MySQL数据库中。
 
    ```sql
-   # 这里演示一下使用MySQL命令方式将SQL文件导入
-   # 创建linxuan数据库
+   -- 这里演示一下使用MySQL命令方式将SQL文件导入
+   -- 创建linxuan数据库
    mysql> create database if not exists linxuan;
    Query OK, 1 row affected, 1 warning (0.02 sec)
    
-   # 使用林炫数据库
+   -- 使用linxuan数据库
    mysql> use linxuan;
    Database changed
    
-   # 导入SQL文件，注意SQL文件不要放在中文目录下面。可以直接复制放在D盘下面，使用完之后删除掉。
+   -- 导入SQL文件，注意SQL文件不要放在中文目录下面。可以直接复制放在D盘下面，使用完之后删除掉。
    mysql> source D:\bookmanage.sql
    Query OK, 0 rows affected (0.00 sec)
    ...
@@ -81,13 +81,13 @@
 
    Lombok能够帮助我们简化开发，使用它不仅需要在`pom.xml`中引入依赖，同样需要在IDEA里面下载该插件。点击File -> Settings -> Plugins，转到插件仓库。
 
-   ![](.\src\main\resources\img\1-2下载Lombok插件.png)
+   <img src=".\src\main\resources\img\1-2下载Lombok插件.png" style="zoom:80%;" />
 
 4. 下载依赖。
 
    点击Maven刷新图标，下载所需依赖。
 
-   ![](.\src\main\resources\img\1-1Maven刷新.png)
+   <img src=".\src\main\resources\img\1-1Maven刷新.png" style="zoom:80%;" />
 
 5. 启动项目。
 
@@ -95,7 +95,7 @@
 
    下载好所有的 Maven 依赖之后点击 Maven 图标，找到Plugins，点击「tomcat7:run」即可成功启动。打开浏览器http://localhost/page/login.html页面即可成功访问，账号为admin，密码为123456。
 
-   ![](.\src\main\resources\img\1-3启动项目.png)
+   <img src=".\src\main\resources\img\1-3启动项目.png" style="zoom:80%;" />
 
 ## 注意事项
 
