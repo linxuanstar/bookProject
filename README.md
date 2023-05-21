@@ -38,6 +38,8 @@
 
 - 阿里云Windows链接：https://www.aliyundrive.com/s/tU8bPKChben
 - 蓝奏云Windows链接：https://wwdi.lanzoum.com/iJ6Hq0wpbi1i
+- 蓝奏云Centos链接：https://wwdi.lanzoum.com/iIBzG0wt8sad 密码:8jg3
+- Linux用户也可以下载windows版本文件然后选择所需的文件上传至Linux服务器，最后运行即可！
 ## 部署说明
 
 ### Windows部署
@@ -134,27 +136,29 @@ drwxr-xr-x 4 root root  4096 May 21 11:10 src
 # 登录MySQL将SQL文件给导入数据库中
 [root@linxuanVM bookProject]# mysql -u root -p
 Enter password: 
-
 # 创建linxuan数据库
 mysql> create database if not exists linxuan;
 Query OK, 1 row affected, 1 warning (0.02 sec)
-
 # 使用linxuan数据库
 mysql> use linxuan;
 Database changed
-
-# 导入SQL文件，注意SQL文件不要放在中文目录下面。可以直接复制放在D盘下面，使用完之后删除掉。
+# 导入SQL文件
 mysql> source /opt/app/test/bookProject/src/main/resources/demand/bookmanage.sql
 Query OK, 0 rows affected (0.00 sec)
 ...
-
 # 退出MySQL
 mysql> exit
+
+# 看一下是否需要修改自己的MySQL连接信息，用户名、密码是否正确。
+# 如果需要修改那么使用 vim 命令修改./src/main/resources/jdbc.properties文件
+
 
 # 执行tomcat7插件，这样就开始运行了，日志会在控制台打印。如果想要日志在文件中打印需要配置log4j.xml
 # 执行该插件之后会下载系列的jar包，用于编译、测试、打包...
 [root@linxuanVM bookProject]# mvn tomcat7:run
 ```
+
+插件中设置的端口号为80，因此打开本地浏览器访问http://YourLinuxIP/page/login.html页面即可成功访问，账号为admin，密码为123456。
 
 #### 压缩包下载
 
@@ -184,6 +188,25 @@ total 56
 -rw-r--r-- 1 root root  6467 May 21 14:38 README.md
 drwxr-xr-x 4 root root  4096 May 21 14:38 src
 
+
+# 登录MySQL将SQL文件给导入数据库中
+[root@linxuanVM bookProject]# mysql -u root -p
+Enter password: 
+# 创建linxuan数据库
+mysql> create database if not exists linxuan;
+Query OK, 1 row affected, 1 warning (0.02 sec)
+# 使用linxuan数据库
+mysql> use linxuan;
+Database changed
+# 导入SQL文件
+mysql> source /opt/app/test/bookProject/src/main/resources/demand/bookmanage.sql
+Query OK, 0 rows affected (0.00 sec)
+...
+
+# 看一下是否需要修改自己的MySQL连接信息，用户名、密码是否正确。
+# 如果需要修改那么使用 vim 命令修改./src/main/resources/jdbc.properties文件
+
+
 # 执行mvn clean命令，看一下mvn是否可以成功运行
 [root@linxuanVM bookProject]# mv clean
 # 执行tomcat7插件，这样就开始运行了，日志会在控制台打印。如果想要日志在文件中打印需要配置log4j.xml
@@ -191,9 +214,12 @@ drwxr-xr-x 4 root root  4096 May 21 14:38 src
 [root@linxuanVM bookProject]# mvn tomcat7:run
 ```
 
+插件中设置的端口号为80，因此打开本地浏览器访问http://YourLinuxIP/page/login.html页面即可成功访问，账号为admin，密码为123456。
+
 ## 注意事项
 
-修改前端页面后浏览器没有更换样式，那么可以使用「Ctrl + F5」快捷键清除浏览器缓存强制更新前端页面。
+* 修改前端页面后浏览器没有更换样式，那么可以使用「Ctrl + F5」快捷键清除浏览器缓存强制更新前端页面。
+* 数据库的 SQL 文件在逻辑上是有一点问题的，可以自行修改。
 
 ## 联系方式
 
