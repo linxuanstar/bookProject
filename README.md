@@ -34,10 +34,10 @@
 
 如果您并未学习过 Git 或者是并不喜欢 Git 亦或是不想使用 Git 这款工具，那么可以直接从网盘下载。
 
-- 百度网盘链接：https://pan.baidu.com/s/1waV4zjt9NImKwN6VvdAsEA?pwd=ugyz 
+- 百度网盘Windows链接：https://pan.baidu.com/s/1waV4zjt9NImKwN6VvdAsEA?pwd=ugyz 
 
-- 阿里云链接：https://www.aliyundrive.com/s/tU8bPKChben
-- 蓝奏云链接：https://wwdi.lanzoum.com/iJ6Hq0wpbi1i
+- 阿里云Windows链接：https://www.aliyundrive.com/s/tU8bPKChben
+- 蓝奏云Windows链接：https://wwdi.lanzoum.com/iJ6Hq0wpbi1i
 ## 部署说明
 
 ### Windows部署
@@ -105,9 +105,91 @@
 
 #### Git 方式
 
+在本仓库一共有两个分支，master和test，其中test分支并没有《基于SSM 图书管理系统的设计与实现.docx》文档，因此下载速度较快。当然上面网盘的压缩包里面是有这个文档的。
 
+```sh
+[root@linxuanVM ~]# cd /opt/app/test/
+[root@linxuanVM test]# ll
+total 0
+
+# 克隆test分支
+[root@linxuanVM test]# git clone -b test git@github.com:linxuanstar/bookProject.git
+Cloning into 'bookProject'...
+remote: Enumerating objects: 153, done.
+remote: Counting objects: 100% (153/153), done.
+remote: Compressing objects: 100% (120/120), done.
+remote: Total 153 (delta 22), reused 151 (delta 20), pack-reused 0
+Receiving objects: 100% (153/153), 36.41 MiB | 5.66 MiB/s, done.
+Resolving deltas: 100% (22/22), done.
+
+# 查看克隆下来的文件
+[root@linxuanVM test]# cd bookProject/
+[root@linxuanVM bookProject]# ll
+total 56
+-rw-r--r-- 1 root root 35147 May 21 11:10 LICENSE
+-rw-r--r-- 1 root root  5521 May 21 11:10 pom.xml
+-rw-r--r-- 1 root root  4619 May 21 11:10 README.md
+drwxr-xr-x 4 root root  4096 May 21 11:10 src
+
+# 登录MySQL将SQL文件给导入数据库中
+[root@linxuanVM bookProject]# mysql -u root -p
+Enter password: 
+
+# 创建linxuan数据库
+mysql> create database if not exists linxuan;
+Query OK, 1 row affected, 1 warning (0.02 sec)
+
+# 使用linxuan数据库
+mysql> use linxuan;
+Database changed
+
+# 导入SQL文件，注意SQL文件不要放在中文目录下面。可以直接复制放在D盘下面，使用完之后删除掉。
+mysql> source /opt/app/test/bookProject/src/main/resources/demand/bookmanage.sql
+Query OK, 0 rows affected (0.00 sec)
+...
+
+# 退出MySQL
+mysql> exit
+
+# 执行tomcat7插件，这样就开始运行了，日志会在控制台打印。如果想要日志在文件中打印需要配置log4j.xml
+# 执行该插件之后会下载系列的jar包，用于编译、测试、打包...
+[root@linxuanVM bookProject]# mvn tomcat7:run
+```
 
 #### 压缩包下载
+
+```sh
+# 使用lrzsz或者FileZilla等文件上传工具将压缩包上传至Linux服务器
+[root@linxuanVM test]# ll
+total 856
+-rw-r--r-- 1 root root 869207 May 21 14:42 bookProject.tar.gz
+drwxr-xr-x 3 root root   4096 May 21 14:38 bookProjectTmp
+# 将文件解压至当前目录
+[root@linxuanVM test]# tar -zxvf bookProject.tar.gz 
+...
+
+# 查看当前目录下文件
+[root@linxuanVM test]# ll
+total 860
+drwxr-xr-x 3 root root   4096 May 21 14:43 bookProject
+-rw-r--r-- 1 root root 869207 May 21 14:42 bookProject.tar.gz
+drwxr-xr-x 3 root root   4096 May 21 14:38 bookProjectTmp
+# 进入bookProject目录
+[root@linxuanVM test]# cd bookProject
+# 查看当前目录下面文件
+[root@linxuanVM bookProject]# ll
+total 56
+-rw-r--r-- 1 root root 35821 May 21 14:38 LICENSE
+-rw-r--r-- 1 root root  5671 May 21 14:38 pom.xml
+-rw-r--r-- 1 root root  6467 May 21 14:38 README.md
+drwxr-xr-x 4 root root  4096 May 21 14:38 src
+
+# 执行mvn clean命令，看一下mvn是否可以成功运行
+[root@linxuanVM bookProject]# mv clean
+# 执行tomcat7插件，这样就开始运行了，日志会在控制台打印。如果想要日志在文件中打印需要配置log4j.xml
+# 执行该插件之后会下载系列的jar包，用于编译、测试、打包...
+[root@linxuanVM bookProject]# mvn tomcat7:run
+```
 
 ## 注意事项
 
