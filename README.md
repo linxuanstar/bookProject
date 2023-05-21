@@ -18,7 +18,7 @@
 
 ## 使用前提
 
-下载该项目之前需要下载JDK8+、Maven。
+下载该项目之前需要下载JDK8+、Maven、MySQL。
 
 ## 项目页面
 
@@ -39,6 +39,8 @@
 - 阿里云链接：https://www.aliyundrive.com/s/tU8bPKChben
 - 蓝奏云链接：https://wwdi.lanzoum.com/iJ6Hq0wpbi1i
 ## 部署说明
+
+### Windows部署
 
 可以参考《基于SSM 图书管理系统的设计与实现.docx》这个文档。
 
@@ -96,6 +98,16 @@
    下载好所有的 Maven 依赖之后点击 Maven 图标，找到Plugins，点击「tomcat7:run」即可成功启动。打开浏览器http://localhost/page/login.html页面即可成功访问，账号为admin，密码为123456。
 
    <img src="https://gitee.com/linxuanstar/bookProject/raw/master/src/main/resources/img/1-3%E5%90%AF%E5%8A%A8%E9%A1%B9%E7%9B%AE.png" />
+
+### Linux部署
+
+部署前提：安装JDK + Maven + MySQL
+
+#### Git 方式
+
+
+
+#### 压缩包下载
 
 ## 注意事项
 
